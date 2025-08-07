@@ -17,7 +17,8 @@ end
         light = false,
         tstops::Union{Vector, Nothing} = nothing,
         processVelocity::Union{Nothing, Function} = nothing,
-    ) where {SIM <: Simulation, I <: Integer}
+        saved_values::V = nothing,
+    ) where {SIM <: Simulation, I <: Integer, V}
 
 Create a `Results` object from a given simulation and solution.
 
@@ -28,6 +29,7 @@ Create a `Results` object from a given simulation and solution.
 - `loss=nothing`: The loss value, default is `nothing`.
 - `light=false`: A boolean flag to indicate if only the first and last steps of the solution should be used.
 - `processVelocity::Union{Nothing, Function}=nothing`: Post processing function to map the ice thickness to the surface velocity. It is called before creating the results. It takes as inputs simulation, ice thickness (matrix) and the associated time and returns 3 variables Vx, Vy, V which are all matrix. Defaults is nothing which means no post processing is applied.
+- `saved_values::V` Quantities of interest saved during simulation.
 
 # Returns
 - `results`: A `Results` object containing the processed simulation data.
@@ -43,6 +45,7 @@ function create_results(
     light = false,
     tstops::Union{Vector, Nothing} = nothing,
     processVelocity::Union{Nothing, Function} = nothing,
+    saved_values = nothing,
 ) where {SIM <: Simulation, I <: Integer}
 
     if isnothing(tstops)
@@ -138,7 +141,8 @@ function create_results(
         t = t,
         tspan = simulation.parameters.simulation.tspan,
         θ = θ,
-        loss = loss
+        loss = loss,
+        saved_values,
     )
 
     return results

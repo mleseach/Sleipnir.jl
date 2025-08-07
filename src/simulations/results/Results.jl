@@ -1,5 +1,5 @@
 """
-    mutable struct Results{F <: AbstractFloat, I <: Integer}
+    mutable struct Results{F <: AbstractFloat, I <: Integer, V}
 
 A mutable struct to store the results of simulations.
 
@@ -28,8 +28,9 @@ A mutable struct to store the results of simulations.
 - `tspan::Vector{F}`: Time span of the simulation.
 - `θ::Union{Nothing, ComponentArray{F}}`: Machine learning model parameters.
 - `loss::Union{Nothing, Vector{F}}` Vector with evolution of loss function.
+- `saved_values::V` Quantities of interest saved during simulation.
 """
-mutable struct Results{F <: AbstractFloat, I <: Integer}
+mutable struct Results{F <: AbstractFloat, I <: Integer, V}
     rgi_id::String
     H::Vector{Matrix{F}}
     H_glathida::Matrix{F}
@@ -57,6 +58,7 @@ mutable struct Results{F <: AbstractFloat, I <: Integer}
     tspan::Tuple{F, F}
     θ::Union{Nothing, ComponentArray{F}}
     loss::Union{Nothing, Vector{F}}
+    saved_values::V
 end
 
 Base.:(==)(a::Results, b::Results) = a.rgi_id == b.rgi_id && a.H == b.H &&
@@ -96,7 +98,8 @@ Base.:(==)(a::Results, b::Results) = a.rgi_id == b.rgi_id && a.H == b.H &&
         t::Vector{F} = Vector{Sleipnir.Float}([]),
         tspan::Tuple{F, F} = (NaN, NaN),
         θ::Union{Nothing,ComponentArray{F}} = nothing,
-        loss::Union{Nothing,Vector{F}} = nothing
+        loss::Union{Nothing,Vector{F}} = nothing,
+        save_values::V = nothing,
     ) where {G <: AbstractGlacier, F <: AbstractFloat, IF <: AbstractModel, I <: Integer}
 
 Construct a `Results` object for a glacier simulation.
@@ -128,6 +131,7 @@ Construct a `Results` object for a glacier simulation.
 - `tspan::Tuple(F, F)`: Timespan of the simulation.
 - `θ::Union{Nothing, ComponentArray{F}}`: Model parameters. Defaults to `nothing`.
 - `loss::Union{Nothing, Vector{F}}`: Loss values. Defaults to `nothing`.
+- `saved_values::V` Quantities of interest saved during simulation.
 
 # Returns
 - `results::Results`: A `Results` object containing the simulation results.
@@ -157,19 +161,20 @@ function Results(glacier::G, ifm::IF;
         t::Vector{F} = Vector{Sleipnir.Float}([]),
         tspan::Tuple{F, F} = (NaN, NaN),
         θ::Union{Nothing,ComponentArray{F}} = nothing,
-        loss::Union{Nothing,Vector{F}} = nothing
+        loss::Union{Nothing,Vector{F}} = nothing,
+        saved_values = nothing,
     ) where {G <: AbstractGlacier, F <: AbstractFloat, IF <: AbstractModel, I <: Integer}
 
     x = glacier.Coords["lon"]
     y = glacier.Coords["lat"]
 
     # Build the results struct based on input values
-    results = Results{Sleipnir.Float, Sleipnir.Int}(rgi_id, H, H_glathida, H_ref, S, B,
+    results = Results{Sleipnir.Float, Sleipnir.Int, typeof(saved_values)}(rgi_id, H, H_glathida, H_ref, S, B,
                       x, y,
                       V, Vx, Vy, V_ref, Vx_ref, Vy_ref,
                       date_Vref, date1_Vref, date2_Vref,
                       Δx, Δy,lon,lat, nx, ny, t, tspan,
-                      θ, loss)
+                      θ, loss, saved_values)
 
     return results
 end
