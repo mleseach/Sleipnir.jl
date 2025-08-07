@@ -287,10 +287,13 @@ function Base.show(io::IO, type::MIME"text/plain", glacier::Glacier2D)
     Base.show(io, glacier)
 end
 function Base.show(io::IO, glacier::Glacier2D)
-    if !isnothing(glacier.H₀)
-        H=round.(255*glacier.H₀/maximum(glacier.H₀))
-        display(Gray.(Int.(H'[end:-1:1,1:end])/255))
+    if isempty(glacier.H₀)
+        print("DummyGlacier2D()")
+        return
     end
+
+    H=round.(255*glacier.H₀/maximum(glacier.H₀))
+    display(Gray.(Int.(H'[end:-1:1,1:end])/255))
 
     print("Glacier2D ")
     strName = glacier.name=="" ? "" : " ($(glacier.name))"
