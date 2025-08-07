@@ -219,6 +219,16 @@ function Glacier2D(
     )
 end
 
+"""
+    DummyGlacier2D()
+
+Dummy glacier initialization for infering models caches.
+
+"""
+function DummyGlacier2D()
+    Glacier2D(climate=DummyClimate2D())
+end
+
 ###############################################
 ################### UTILS #####################
 ###############################################
